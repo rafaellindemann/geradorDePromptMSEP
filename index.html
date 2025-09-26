@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gerador de Prompt — Mundo do Trabalho</title>
+  <style>
+    :root{
+      --azul-principal: #164194;
+      --azul-acento:    #008BD2;
+      --bg: #f7f9fc;
+      --card: #ffffff;
+      --texto: #0d1321;
+      --texto-suave: #344054;
+      --borda: #e5e7eb;
+      --sombra: 0 10px 30px rgba(22,65,148,0.08);
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+              Arial, "Noto Sans", "Liberation Sans", "DejaVu Sans", sans-serif;
+      --radius-xl: 18px;
+      --radius-lg: 14px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--font);color:var(--texto);background:linear-gradient(180deg,#fff,var(--bg))}
+    .container{max-width:980px;margin:clamp(16px,3.5vw,48px) auto;padding:0 16px}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+    .badge{background:linear-gradient(135deg,var(--azul-principal),var(--azul-acento));color:#fff;
+      padding:10px 14px;border-radius:999px;font-weight:700;box-shadow:var(--sombra);font-size:14px}
+    h1{margin:0;font-size:clamp(20px,2.2vw,28px);font-weight:800;color:var(--azul-principal)}
+    p.lead{margin:.25rem 0 1.25rem;color:var(--texto-suave)}
+    .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(16px,2.4vw,24px)}
+    @media (max-width:880px){.grid{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-xl);box-shadow:var(--sombra)}
+    form{padding:clamp(16px,2.2vw,24px);display:grid;gap:16px}
+    .field{display:flex;flex-direction:column;gap:8px}
+    label{font-weight:600;font-size:14px;color:var(--azul-principal)}
+    .input-wrap{display:flex;align-items:center;gap:6px}
+    .input-wrap input{flex:1}
+    input[type="text"],input[type="number"]{width:100%;padding:12px 14px;border:1px solid var(--borda);
+      border-radius:var(--radius-lg);font-size:16px;outline:none;background:#fff}
+    input:focus{border-color:var(--azul-acento);box-shadow:0 0 0 4px rgba(0,139,210,.15)}
+    .btn-paste{border:1px solid var(--borda);background:#f0f6fc;color:var(--azul-principal);border-radius:6px;
+      padding:6px 10px;cursor:pointer;font-size:16px;line-height:1;transition:background .2s}
+    .btn-paste:hover{background:#e5f2fa}
+    .radios{display:flex;gap:12px;flex-wrap:wrap}
+    .radio{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--borda);
+      border-radius:999px;background:#fff}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    button{border:0;border-radius:999px;padding:12px 16px;font-weight:700;cursor:pointer}
+    .btn-primary{background:linear-gradient(135deg,var(--azul-principal),var(--azul-acento));color:#fff}
+    .btn-secondary{background:#eef6ff;color:var(--azul-principal);border:1px solid #d6e7fb}
+    .output{padding:clamp(12px,2vw,18px);display:flex;flex-direction:column;gap:12px}
+    .toolbar{display:flex;align-items:center;justify-content:space-between}
+    .prompt{width:100%;min-height:260px;padding:14px;border:1px dashed #cdd7e1;border-radius:var(--radius-lg);
+      background:#fbfdff;font-family:ui-monospace,monospace;font-size:15px;line-height:1.55;color:#0b1a33;
+      white-space:pre-wrap;word-break:break-word}
+    .btn-ghost{background:transparent;color:var(--azul-principal);border:1px dashed var(--azul-principal);
+      padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:600}
+    .btn-ghost:hover{background:#eef6ff}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="badge">IA Delicinha</span>
+      <div>
+        <h1>Objetivas</h1>
+        <p class="lead">Preencha os campos, gere o prompt no formato exato e copie com um clique.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <form id="promptForm">
+          <div class="field">
+            <label for="uc">Unidade Curricular</label>
+            <div class="input-wrap">
+              <input id="uc" type="text" required />
+              <button type="button" class="btn-paste" data-target="uc">📋</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="assunto">Assunto</label>
+            <div class="input-wrap">
+              <input id="assunto" type="text" required />
+              <button type="button" class="btn-paste" data-target="assunto">📋</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="numero">Número de questões</label>
+            <div class="input-wrap">
+              <input id="numero" type="number" min="1" step="1" required />
+              <button type="button" class="btn-paste" data-target="numero">📋</button>
+            </div>
+          </div>
+          <div class="field">
+            <span style="font-weight:600;font-size:14px;color:var(--azul-principal)">Nível de complexidade</span>
+            <div class="radios">
+              <label class="radio"><input type="radio" name="nivel" value="Baixa" checked> Baixa</label>
+              <label class="radio"><input type="radio" name="nivel" value="Média"> Média</label>
+              <label class="radio"><input type="radio" name="nivel" value="Alta"> Alta</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="capacidade">Capacidade avaliada</label>
+            <div class="input-wrap">
+              <input id="capacidade" type="text" required />
+              <button type="button" class="btn-paste" data-target="capacidade">📋</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="funcao">Função/Subfunção relacionada</label>
+            <div class="input-wrap">
+              <input id="funcao" type="text" required />
+              <button type="button" class="btn-paste" data-target="funcao">📋</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="conhecimento">Conhecimento relacionado</label>
+            <div class="input-wrap">
+              <input id="conhecimento" type="text" required />
+              <button type="button" class="btn-paste" data-target="conhecimento">📋</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn-primary">Gerar prompt</button>
+            <button type="button" id="limpar" class="btn-secondary">Limpar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="output">
+          <div class="toolbar">
+            <h2>Seu prompt</h2>
+            <div style="display:flex; gap:8px;">
+              <button type="button" id="copiar" class="btn-ghost">Copiar</button>
+              <a href="https://chatgpt.com/g/g-9Q4mG5rcy-elaborador-de-provas-sl3v1?model=gpt-4o"
+                 target="_blank" rel="noopener noreferrer"
+                 class="btn-ghost"
+                 style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">
+                 Abrir no GPT
+              </a>
+            </div>
+          </div>
+          <div id="resultado" class="prompt"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('promptForm');
+    const resultado = document.getElementById('resultado');
+    const btnCopiar = document.getElementById('copiar');
+    const btnLimpar = document.getElementById('limpar');
+
+    const campos = {
+      uc: document.getElementById('uc'),
+      assunto: document.getElementById('assunto'),
+      numero: document.getElementById('numero'),
+      capacidade: document.getElementById('capacidade'),
+      funcao: document.getElementById('funcao'),
+      conhecimento: document.getElementById('conhecimento'),
+    };
+
+    function nivelSelecionado(){
+      const r = form.querySelector('input[name="nivel"]:checked');
+      return r ? r.value : '';
+    }
+
+    function montarPrompt(){
+      const uc = campos.uc.value.trim();
+      const assunto = campos.assunto.value.trim();
+      const numero = campos.numero.value.trim();
+      const nivel = nivelSelecionado();
+      const capacidade = campos.capacidade.value.trim();
+      const funcao = campos.funcao.value.trim();
+      const conhecimento = campos.conhecimento.value.trim();
+
+      if(!uc || !assunto || !numero || !nivel || !capacidade || !funcao || !conhecimento){
+        return '';
+      }
+
+      return `Unidade Curricular: {${uc}}
+Assunto: {${assunto}}
+Número de questões: {${numero}}
+Nível de complexidade: {${nivel}}
+Capacidade avaliada: {${capacidade}}
+Função/Subfunção relacionada: {${funcao}}
+Conhecimento relacionado: {${conhecimento}}
+Por favor, crie {${numero}} questões no contexto do mundo do trabalho, focando na capacidade de {${capacidade}}. Certifique-se de que as questões sejam claras, relevantes e alinhadas com as habilidades avaliadas, e que apresente uma justificativa do porquê o aluno escolheu as alternativas erradas, bem como a justificativa da alternativa correta.`;
+    }
+
+    function atualizarPreview(){
+      resultado.textContent = montarPrompt() || 'Preencha todos os campos para gerar o prompt.';
+    }
+
+    form.addEventListener('submit', e => { e.preventDefault(); atualizarPreview(); });
+    form.addEventListener('input', atualizarPreview);
+    form.addEventListener('change', atualizarPreview);
+
+    btnLimpar.addEventListener('click', () => {
+      form.reset();
+      atualizarPreview();
+      campos.uc.focus();
+    });
+
+    btnCopiar.addEventListener('click', async () => {
+      const texto = resultado.textContent.trim();
+      if(!texto || texto.startsWith('Preencha')){
+        btnCopiar.textContent = 'Nada para copiar';
+        setTimeout(()=> btnCopiar.textContent = 'Copiar', 1200);
+        return;
+      }
+      await navigator.clipboard.writeText(texto);
+      btnCopiar.textContent = 'Copiado!';
+      setTimeout(()=> btnCopiar.textContent = 'Copiar', 1200);
+    });
+
+    // Botões de colar nos inputs
+    document.querySelectorAll('.btn-paste').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        try {
+          const texto = await navigator.clipboard.readText();
+          input.value = texto;
+          input.dispatchEvent(new Event('input'));
+        } catch {
+          alert('Não consegui ler a área de transferência.');
+        }
+      });
+    });
+
+    atualizarPreview();
+  </script>
+</body>
+</html>
